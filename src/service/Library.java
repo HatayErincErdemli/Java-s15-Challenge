@@ -1,17 +1,17 @@
 package service;
 
-import model.Book;
-import model.User;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import model.book.Author;
+import model.book.Book;
+import model.book.Category;
+import model.user.User;
+import java.util.*;
 
 public class Library {
-    private List<Book> books; // Kitap listesi
-    private List<User> users; // Kullanıcı listesi
-    private Map<User, List<Book>> borrowRecords; // Ödünç alınan kitap kaydı
+    private List<Book> books;
+    private List<User> users;
+    private Map<User, List<Book>> borrowRecords;
+    private List<Author> authors = new ArrayList<>();
+    private List<Category> categories = new ArrayList<>();
 
     public Library() {
         this.books = new ArrayList<>();
@@ -19,61 +19,130 @@ public class Library {
         this.borrowRecords = new HashMap<>();
     }
 
-    // Kitap ekleme
     public void addBook(Book book) {
         books.add(book);
     }
 
-    // Kitap silme
     public boolean removeBook(int bookId) {
-        return books.removeIf(book -> book.getId() == bookId);
+        Book book = findBookById(bookId);
+        if (book != null && book.isAvailable()) {
+            books.remove(book);
+            return true;
+        }
+        return false;
     }
 
-    // Yeni kullanıcı ekleme
+    public void updateBook(int bookId, String newTitle, Author newAuthor, Category newCategory) {
+        Book book = findBookById(bookId);
+        if (book != null && book.isAvailable()) {
+            book.updateDetails(newTitle, newAuthor, newCategory);
+        }
+    }
+
     public void addUser(User user) {
         users.add(user);
     }
 
-    // Kullanıcıyı ID'ye göre bulma
-    public User findUserById(int userId) {
-        return users.stream().filter(u -> u.getId() == userId).findFirst().orElse(null);
-    }
-
-    // Kitap ID'ye göre bulma
     public Book findBookById(int bookId) {
-        return books.stream().filter(b -> b.getId() == bookId).findFirst().orElse(null);
-    }
-
-    // Kitap ödünç alma
-    public void borrowBook(int user, int bookId) {
-        Book book = findBookById(bookId);
-        if (user == null || book == null) {
-            System.out.println("Kullanıcı veya kitap bulunamadı.");
-            return;
+        for (Book book : books) {
+            if (book.getId() == bookId) {
+                return book;
+            }
         }
-        user.borrowBook(book);
-        borrowRecords.computeIfAbsent(user, k -> new ArrayList<>()).add(book);
+        return null;
     }
 
-    // Kitap iade etme
-    public void returnBook(User user, int bookId) {
-        Book book = findBookById(bookId);
-        if (user == null || book == null) {
-            System.out.println("Kullanıcı veya kitap bulunamadı.");
-            return;
+    public User findUserById(int userId) {
+        for (User user : users) {
+            if (user.getId() == userId) {
+                return user;
+            }
         }
-        user.returnBook(book);
-        borrowRecords.getOrDefault(user, new ArrayList<>()).remove(book);
+        return null;
     }
 
-    // Kategoriye göre kitap listeleme
-    public List<Book> listBooksByCategory(String category) {
+    public List<Book> searchBooksByTitle(String title) {
         List<Book> result = new ArrayList<>();
         for (Book book : books) {
-            if (book.getCategory().equalsIgnoreCase(category)) {
+            if (book.getTitle().toLowerCase().contains(title.toLowerCase())) {
                 result.add(book);
             }
         }
         return result;
+    }
+
+    public List<Book> searchBooksByAuthor(String authorName) {
+        List<Book> result = new ArrayList<>();
+        for (Book book : books) {
+            if (book.getAuthor().getName().toLowerCase().contains(authorName.toLowerCase())) {
+                result.add(book);
+            }
+        }
+        return result;
+    }
+
+    public List<Book> getBooksByCategory(Category category) {
+        List<Book> result = new ArrayList<>();
+        for (Book book : books) {
+            if (book.getCategory().getId() == category.getId()) {
+                result.add(book);
+            }
+        }
+        return result;
+    }
+
+    public List<Book> getBooksByAuthor(Author author) {
+        List<Book> result = new ArrayList<>();
+        for (Book book : books) {
+            if (book.getAuthor().getId() == author.getId()) {
+                result.add(book);
+            }
+        }
+        return result;
+    }
+
+    public void listAllBooks() {
+        if (books.isEmpty()) {
+            System.out.println("Kütüphanede kitap bulunmamaktadır.");
+            return;
+        }
+        System.out.println("\n=== Kitap Listesi ===");
+        for (Book book : books) {
+            System.out.println(book);
+        }
+    }
+
+    public List<Book> getBooks() {
+        return books;
+    }
+
+    public List<User> getUsers() {
+        return users;
+    }
+
+    public Map<User, List<Book>> getBorrowRecords() {
+        return borrowRecords;
+    }
+
+    public Author findOrCreateAuthor(int nextAuthorId, String authorName) {
+        for (Author author : authors) {
+            if (author.getName().equalsIgnoreCase(authorName)) {
+                return author;
+            }
+        }
+        Author newAuthor = new Author(nextAuthorId, authorName);
+        authors.add(newAuthor);
+        return newAuthor;
+    }
+
+    public Category findOrCreateCategory(int nextCategoryId, String categoryName, String description) {
+        for (Category category : categories) {
+            if (category.getName().equalsIgnoreCase(categoryName)) {
+                return category;
+            }
+        }
+        Category newCategory = new Category(nextCategoryId, categoryName, description);
+        categories.add(newCategory);
+        return newCategory;
     }
 }
