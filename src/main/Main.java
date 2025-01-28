@@ -102,12 +102,12 @@ public class Main {
 
         Author author = library.findOrCreateAuthor(nextAuthorId, authorName);
         if (author.getId() == nextAuthorId) {
-            nextAuthorId++; // Sadece yeni yazar oluşturulduğunda ID'yi artır
+            nextAuthorId++; // Sadece yeni yazar oluşturulduğunda ID'yi artırır
         }
 
         Category category = library.findOrCreateCategory(nextCategoryId++, categoryName, "");
         if (category.getId() == nextCategoryId) {
-            nextCategoryId++; // Sadece yeni kategori oluşturulduğunda ID'yi artır
+            nextCategoryId++; // Sadece yeni kategori oluşturulduğunda ID'yi artırır
         }
 
         Book book = new Book(nextBookId++, title, author, category);
@@ -259,8 +259,8 @@ public class Main {
     }
 
     private static void addSampleData(Library library) {
-        library.addUser(new Student(1, "Ali", "12345", "Bilgisayar"));
-        library.addUser(new Teacher(2, "Ayşe", "Fen", "A1"));
+        library.addUser(new Student(1, "Ali Veli", "12345", "Bilgisayar Mühendisliği"));
+        library.addUser(new Teacher(2, "Ayşe Kılıç", "Fen Bilimleri Fakültesi", "A1"));
 
         Author author = new Author(nextAuthorId++, "George Orwell");
         Category category = new Category(nextCategoryId++, "Roman", "");
